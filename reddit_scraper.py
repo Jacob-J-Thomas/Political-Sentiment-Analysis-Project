@@ -23,16 +23,19 @@ def retrieve_db(loc_path, subR, n_samples):
 
         return data
 
+#Bellow code returns error because for some reason it doesn't open the file as a list
 def open_data(path):
     with open(path, 'rb') as f:
-        data = pickle.load(f)
+        data = pickle.load(f) #refactor this after testing
         return data
 
 def save_data(path, subR, n_samples):
     with open(path, 'wb') as f:
         data = get_data(subR, n_samples)
+        print(type(data))
+        pickle.dump(data, f)#, pickle.HIGHEST_PROTOCOL       #Refactor this as well
+
         print(len(data), ' comments found from ', subR)
-        pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
 
 def get_data(subR, n_samples):
     count = 0
@@ -50,6 +53,8 @@ def get_data(subR, n_samples):
                     data.append(com_str)
                     count += 1
 
+                #could make this a different function so that its a little more ledgibel,
+                #could also put most of the below and above logic in it to minimize duplicate data
                 for reply in comment.replies:
                     if count < n_samples:
                         reply_str = clean_str(reply.body)
@@ -79,16 +84,23 @@ def clean_str(string):
     string = re.sub(r'http\S+', '', string)#removes urls
     string = string.lower()#converts to lowercase
 
+    #put something to handle r/subbRedditReference here?
+
     #seperates words that appear at the begining and end of sentences
     string = string.replace('.', ' ')
     string = string.replace('!', ' ')
     string = string.replace('?', ' ')
+    string = string.replace('/', ' ')
+    string = string.replace(',', ' ')#not all are gramatically correct, 
+                                     #or maybe add space to the below code
 
     #removes any remaining special characters
     whitelist = set('abcdefghijklmnopqrstuvwxyz ')
-    cleaned = ''.join(filter(whitelist.__contains__, string))#removes all other special characters
-                
-    return cleaned
+    string = ''.join(filter(whitelist.__contains__, string))
+    
+    print(string)
 
-#retrieve_db('cons.csv', con_paths, n_samples)
+    return string
+
+retrieve_db('conservative.pickle', 'conservative', 50)
 #retrieve_db('liberal.csv', lib_paths, n_samples)

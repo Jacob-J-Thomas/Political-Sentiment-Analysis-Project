@@ -8,7 +8,7 @@
 #https://www.youtube.com/watch?v=Go-MHJyGzPg
 
 import reddit_scraper
-#import numpy as np
+import numpy as np
 #import tensorflow as tf
 #from tensorflow import keras
 import nltk
@@ -17,24 +17,24 @@ from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer#replace with stemming if you decide context is important later -- PorterStemmer
 from nltk.corpus import wordnet
 
-n_samples = 500
+n_samples = 10
 c_data = []
 l_data = []
-c_paths = ['Conservative',
-            'Republican']
-l_paths = ['Liberal',
-            'Democrats']
-paths = c_paths.append(l_paths)
+paths = ['Conservative',
+         'Republican',
+         'Liberal',
+         'Democrats']
 
-#is this really the most maintainable/flexible way to do this? Can you think of anything better?
+#Could we make the retrieve_db() function work so that it handles the below logic,
+# and accepts n number of "path in paths" and n number groups of "paths" all together?
 for path in paths:
     loc_path = path + '.pickle'
         
-    if path in c_paths:
-        data = data.ws_no_comments.retrieve_db(loc_path, path, n_samples)
+    if (path == 'Conservative') or (path == 'Republican'):
+        data = reddit_scraper.retrieve_db(loc_path, path, n_samples)
         c_data.append(data)
-    elif path in l_paths:
-        data = data.ws_no_comments.retrieve_db(loc_path, path, n_samples)
+    elif (path == 'Liberal') or (path == 'Democrats'):
+        data = reddit_scraper.retrieve_db(loc_path, path, n_samples)
         l_data.append(data)
     else:
         print('Error: The specified database path, ', path, ', does not appear in any subset grouping')
@@ -48,7 +48,7 @@ def bagify(data):
     word_bag = []
 
     for string in data:
-        string = word_tokenize(string)
+        string = word_tokenize(str(string))
         #print string here to see if its being converted to a list of strings the size of words, or what
         for word in string:
             word = lemmatizer.lemmatize(word)
