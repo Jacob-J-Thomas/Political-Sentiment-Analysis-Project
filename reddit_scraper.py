@@ -1,27 +1,44 @@
 #new line for each comment?
 #make callable from another script?
 #gather all comments?
-#refacter
+#refacter - namely retrieve_db() and get_data()
+#URLS ARE MAKING IT THROUGH AGAIN, WTF
 
-#import cleantext
 import re
 import pickle
 import praw
 
-def retrieve_db(loc_path, subR, n_samples):
-    try:
-        data = open_data(loc_path)
-        print(loc_path + ' found')
-            
-        return data
+#Below could be refactered for clarity
+def retrieve_db(groupings, n_samples):
 
-    except OSError:
-        save_data(loc_path, subR, n_samples)
+    pickle_lists = []
+    i = 0
 
-        data = open_data(loc_path)
-        print(loc_path + ' saved')
+    for path_list in groupings:
 
-        return data
+        pickle_lists.append([])
+
+        for subR in path_list:
+
+            loc_path = subR + '.pickle'
+
+            try:
+                pickle = open_data(loc_path)
+                pickle_lists[i].append(pickle)
+
+                print(loc_path + ' found')
+
+            except OSError:
+                save_data(loc_path, subR, n_samples)
+
+                pickle = open_data(loc_path)
+                pickle_lists[i].append(pickle)
+
+                print(loc_path + ' saved')
+
+        i += 1
+
+    return pickle_lists
 
 #Bellow code returns error because for some reason it doesn't open the file as a list
 def open_data(path):
@@ -32,7 +49,6 @@ def open_data(path):
 def save_data(path, subR, n_samples):
     with open(path, 'wb') as f:
         data = get_data(subR, n_samples)
-        print(type(data))
         pickle.dump(data, f)#, pickle.HIGHEST_PROTOCOL       #Refactor this as well
 
         print(len(data), ' comments found from ', subR)
@@ -98,11 +114,9 @@ def clean_str(string):
     #removes any remaining special characters
     whitelist = set('abcdefghijklmnopqrstuvwxyz ')
     string = ''.join(filter(whitelist.__contains__, string))
-    
-    print(string)
 
     return string
 
-final_data = retrieve_db('conservative.pickle', 'conservative', 50)
+#final_data = retrieve_db('conservative.pickle', 'conservative', 50)
 
 #retrieve_db('liberal.csv', lib_paths, n_samples)

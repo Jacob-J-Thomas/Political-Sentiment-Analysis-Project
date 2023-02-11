@@ -1,66 +1,88 @@
+#Pull commit and push
+#
 #create a bag of words
-#       -prevent useless words from appearing in bag of words
+#   -seperate bag of words into liberal and conservative camps
 #create a system of vectors associated with each word
 #train the model on 50% to 80% the data
 #test the model on the other 50% to 20%
-
-#https://www.projectpro.io/recipes/build-simple-neural-network-tensorflow
-#https://www.youtube.com/watch?v=Go-MHJyGzPg
 
 import reddit_scraper
 import numpy as np
 #import tensorflow as tf
 #from tensorflow import keras
 import nltk
-#nltk.download('wordnet')#only need to run this once
+#nltk.download('wordnet')#only need to run these downloads once
+#nltk.download('stopwords')
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer#replace with stemming if you decide context is important later -- PorterStemmer
-from nltk.corpus import wordnet
+from nltk.corpus import wordnet 
+from nltk.corpus import stopwords
 
+#subreddit paths
+conservative = ['conservative',
+                'republican']
+liberal = ['liberal',
+           'democrats']
+
+#reddit_scraper variables
 n_samples = 10
-c_data = []
-l_data = []
-paths = ['Conservative',
-         'Republican',
-         'Liberal',
-         'Democrats']
+groupings = [conservative,
+             liberal]
 
-#Could we make the retrieve_db() function work so that it handles the below logic,
-# and accepts n number of "path in paths" and n number groups of "paths" all together?
-for path in paths:
-    loc_path = path + '.pickle'
-        
-    if (path == 'Conservative') or (path == 'Republican'):
-        data = reddit_scraper.retrieve_db(loc_path, path, n_samples)
-        c_data.append(data)
-    elif (path == 'Liberal') or (path == 'Democrats'):
-        data = reddit_scraper.retrieve_db(loc_path, path, n_samples)
-        l_data.append(data)
-    else:
-        print('Error: The specified database path, ', path, ', does not appear in any subset grouping')
-    
-    #we might want to move the try and except handler into this function. I believe this could allow us to access files seperately
+data = reddit_scraper.retrieve_db(groupings, n_samples)
+
+#Below is for testing data structure, should be as follows:
+#2          - for groupings
+#10         - for comments in grouping
+#10         - for comments in grouping again
+#2          - for groupings again
+#10         - for comments in grouping again
+#10         - for comments ing grouping again
+for list in data:
+    print('layer 1: ', len(list))
+    for i in list:
+        print('layer 2: ', len(i))
+
+
+
+
+
 
 lemmatizer = WordNetLemmatizer()
 
 def bagify(data):
 
     word_bag = []
+    stop_words = set(stopwords.words('english'))#removes irrelevant words such as "i", "you", "the", "a"
 
-    for string in data:
-        string = word_tokenize(str(string))
+    for comment in data:
+        comment = word_tokenize(comment)
         #print string here to see if its being converted to a list of strings the size of words, or what
-        for word in string:
+        for word in comment:
             word = lemmatizer.lemmatize(word)
-            if word not in word_bag:
+            if (word not in stop_words and word not in word_bag):
                 word_bag.append(word)
     
     return word_bag
 
-c_bag = bagify(c_data)
+#print(conservative)
 
-printable_list = c_bag[:50]
-print(printable_list)
+
+
+# conservative = bagify(conservative)
+# liberal = bagify(liberal)
+# republican = bagify(republican)
+# democrats = bagify(democrats)
+
+#below are returning none for some reason - may 
+# be because it is a list of lists rather than a true append
+# c_bag = conservative.append(republican)
+# l_bag = liberal.append(democrats)
+
+# print(conservative)
+
+#printable_list = c_bag[:50]
+#print(printable_list)
 
 
 
